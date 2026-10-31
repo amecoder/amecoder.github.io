@@ -1,9 +1,10 @@
 // Tuning values: stage palettes, mob archetypes, drop rates and weapon evolutions.
 window.GAME_CONFIG = (function () {
-  const STAGE_COLORS = ['#7bd389', '#6fa8ff', '#ffb35c', '#c38bff', '#ff7aa8', '#59d6c9', '#ff6b6b'];
+  const STAGE_COLORS = ['#7bd389', '#6fa8ff', '#ffb35c', '#c38bff', '#f2d16b', '#ff7aa8', '#8fe0a0', '#59d6c9', '#ff6b6b'];
   const GROUNDS = [
     ['#1c2620', '#202b24', '#2c3a30'], ['#1b2130', '#1f2637', '#2b3550'], ['#29231d', '#2f2821', '#41372c'], ['#241d30', '#2a2237', '#3a2f4d'],
-    ['#2c1d26', '#33222c', '#47303d'], ['#192a29', '#1d302f', '#284443'], ['#2b1c1c', '#322121', '#462e2e'],
+    ['#2a2717', '#302c1b', '#454028'], ['#2c1d26', '#33222c', '#47303d'], ['#1c2b1f', '#213224', '#2f4733'],
+    ['#192a29', '#1d302f', '#284443'], ['#2b1c1c', '#322121', '#462e2e'],
   ];
   const KINDS = {
     bug:  { r: 4.5, hp: (k) => 5 + k * 4,   spd: (k) => 26 + k * 2, dmg: (k) => 5 + k,     xp: 1, w: 10, h: 9 },

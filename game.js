@@ -2,12 +2,12 @@
 (function () {
   'use strict';
 
-  const C = window.CONTENT, SPR = window.SPRITES, AU = window.AUDIO, FX = window.FX, UI = window.UI;
+  const C = window.CONTENT, SPR = window.SPRITES, AU = window.AUDIO, FX = window.FX, UI = window.UI, SCENE = window.SCENE;
   const LEVEL = C.levels[0];
   const STAGES = LEVEL.stages;
-  const STAGE_TIME = 50;
+  const STAGE_TIME = 30;
   const WEAPON_MAX = 5, ITEM_MAX = 3, MOB_CAP = 520;
-  const { STAGE_COLORS, GROUNDS, KINDS, PICKUP_CHANCE, EVOLUTIONS } = window.GAME_CONFIG;
+  const { STAGE_COLORS, KINDS, PICKUP_CHANCE, EVOLUTIONS } = window.GAME_CONFIG;
   const DEBUG = /[?&]debug\b/.test(location.search);
 
   const canvas = document.getElementById('game');
@@ -27,10 +27,9 @@
   addEventListener('resize', resize);
   resize();
   // ---------- state ----------
-  const game = { mode: 'title', stageIdx: 0, t: 0, time: 0, bossSpawned: false, bossDead: false, spawnAcc: 0, nextHorde: 12,
+  const game = { mode: 'title', stageIdx: 0, t: 0, time: 0, bossSpawned: false, bossDead: false, spawnAcc: 0, nextHorde: 6,
     snapshot: null, kills: 0, playTime: 0, log: [], pendingLevels: 0 };
-  let player = null, enemies = [], bullets = [], ebullets = [], gems = [], pickups = [], bolts = [];
-  const demo = [];
+  let player = null, enemies = [], bullets = [], ebullets = [], gems = [], pickups = [], bolts = [], mines = [];
 
   function newPlayer() {
     return { x: 0, y: 0, r: 5, hp: 120, level: 1, xp: 0, xpNext: 5, weapons: {}, items: {}, evolved: {}, bonusDamage: 0,
@@ -121,6 +120,10 @@
       shoot(aim() + (Math.random() - 0.5) * 0.3, { kind: 'bolt', speed: 240, r: 1.8, dmg: 6 + lv * 2, life: 1, color: this.color }, s);
     } },
     python: { color: '#ffd23f', orbit: true },
+    cpp: { color: '#ff6b6b', interval: 0.9, fire(lv) {
+      if (mines.length >= 5 + lv) mines.shift();
+      mines.push({ x: player.x + (Math.random() - 0.5) * 16, y: player.y + (Math.random() - 0.5) * 16, r: 24 + lv * 4, dmg: 34 + lv * 14, t: 0 });
+    } },
     llm: { color: '#4fc3ff', interval: 0.95, fire(lv, s) {
       for (let i = 0; i < 1 + lv; i++) shoot(Math.random() * Math.PI * 2, { kind: 'missile', speed: 110, r: 3, dmg: 16 + lv * 5, life: 3, homing: 5, blast: 18, color: this.color }, s);
     } },
@@ -185,7 +188,7 @@
   }
   function spawnBoss() {
     const st = STAGES[game.stageIdx], p = ringPoint(-30);
-    const hp = 1500 + game.stageIdx * 1500;
+    const hp = 6500 + game.stageIdx * 5200;
     enemies.push({ x: p.x, y: p.y, r: 12, hp, maxHp: hp, spd: 30, dmg: 16 + game.stageIdx * 3, name: st.boss.name, boss: true, kind: 'boss',
       color: stageColor(), kx: 0, ky: 0, hitCd: 0, flash: 0, w: 32, h: 30, pattern: 0, patternT: 2.5, dashing: 0, tele: 0, tx: 0, ty: 0 });
     game.bossSpawned = true;
@@ -316,9 +319,10 @@
     game.log.push({ stage: STAGES[game.stageIdx].name, kind, title, story });
   }
 
-  function startStage(idx, retry) {
-    game.stageIdx = idx; game.t = 0; game.spawnAcc = 0; game.nextHorde = 12; game.bossSpawned = false; game.bossDead = false;
-    enemies = []; bullets = []; ebullets = []; gems = []; pickups = []; bolts = [];
+  // `cleared` carries the previous stage's clear text so one panel covers both "clear" and "next stage".
+  function startStage(idx, retry, cleared) {
+    game.stageIdx = idx; game.t = 0; game.spawnAcc = 0; game.nextHorde = 6; game.bossSpawned = false; game.bossDead = false;
+    enemies = []; bullets = []; ebullets = []; gems = []; pickups = []; bolts = []; mines = [];
     FX.reset();
     player.x = 0; player.y = 0; player.iframe = 1.2;
     AU.setStage(idx); AU.setIntense(false);
@@ -331,9 +335,13 @@
       const chips = [];
       if (got) chips.push(UI.chip(C.weapons[got].name + ' 획득', 'w'));
       st.unlock.weapons.filter((w) => w !== got).forEach((w) => chips.push(UI.chip(C.weapons[w].name + ' 해금', 'w')));
-      st.unlock.items.forEach((i) => chips.push(UI.chip(C.items[i].name + ' 해금')));
+      st.unlock.items.forEach((i) => chips.push(UI.chip(C.items[i].name + ' 해금', C.items[i].category === 'exp' ? 'exp' : '')));
+      const body = cleared
+        ? [`<span class="cleared">✔ ${UI.esc(cleared.boss)} 처치</span> ${UI.esc(cleared.text)}`, `<b>다음:</b> ${UI.esc(st.intro)}`]
+        : [UI.esc(st.intro)];
+      const tag = cleared ? `STAGE ${idx} CLEAR → STAGE ${idx + 1}/${STAGES.length}` : `${LEVEL.title} · STAGE ${idx + 1}/${STAGES.length}`;
       setMode('story');
-      UI.story(`${LEVEL.title} · STAGE ${idx + 1}`, st.name, [UI.esc(st.intro)], chips, () => setMode('play'));
+      UI.story(tag, st.name, body, chips, () => setMode('play'), cleared ? '다음 스테이지' : '시작');
     } else {
       setMode('play');
     }
@@ -345,10 +353,9 @@
     if (game.mode !== 'play' || !game.bossDead) return;
     game.bossDead = false;
     const st = STAGES[game.stageIdx], next = game.stageIdx + 1;
+    if (next < STAGES.length) { startStage(next, false, { boss: st.boss.name, text: st.clear }); return; }
     setMode('story');
-    UI.story(`STAGE ${game.stageIdx + 1} CLEAR`, st.boss.name + ' 처치', [UI.esc(st.clear)], [], () => {
-      if (next < STAGES.length) startStage(next); else showEnding();
-    });
+    UI.story(`STAGE ${game.stageIdx + 1} CLEAR`, st.boss.name + ' 처치', [UI.esc(st.clear)], [], showEnding, '엔딩 보기');
   }
 
   function fmtTime(sec) { const m = Math.floor(sec / 60), s2 = Math.floor(sec % 60); return `${m}:${String(s2).padStart(2, '0')}`; }
@@ -399,7 +406,7 @@
     it.forEach((id) => {
       const lv = player.items[id] || 0, d = C.items[id];
       if (lv >= ITEM_MAX) return;
-      const o = { kind: 'item', id, title: d.name, badge: lv ? `Lv ${lv} → ${lv + 1}` : 'NEW', desc: d.desc || d.effect, story: '' };
+      const o = { kind: 'item', id, title: d.name, badge: lv ? `Lv ${lv} → ${lv + 1}` : d.category === 'exp' ? 'NEW 경험' : 'NEW', desc: d.desc || d.effect, story: '' };
       (!lv && cur.items.includes(id) ? fresh : rest).push(o);
     });
     for (let i = rest.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [rest[i], rest[j]] = [rest[j], rest[i]]; }
@@ -413,7 +420,7 @@
   function levelUp() {
     player.level += 1;
     player.xp -= player.xpNext;
-    player.xpNext = Math.round(4 + player.level * 1.6 + Math.pow(player.level, 1.25));
+    player.xpNext = Math.round(4 + player.level * 1.1 + Math.pow(player.level, 1.1));
     AU.play('levelup'); FX.ring(player.x, player.y, 40, '#ffd23f', 0.5); FX.flash('#ffd23f', 0.15);
     setMode('levelup');
     UI.levelup(player.level, options(), choose);
@@ -428,7 +435,7 @@
     } else if (o.kind === 'item') {
       const lv = (player.items[o.id] || 0) + 1;
       player.items[o.id] = lv;
-      if (lv === 1) { UI.toast(C.items[o.id].name, C.items[o.id].desc, 'item'); logGrowth('item', C.items[o.id].name, C.items[o.id].desc); }
+      if (lv === 1) { const k = C.items[o.id].category === 'exp' ? 'exp' : 'item'; UI.toast(C.items[o.id].name, C.items[o.id].desc, k); logGrowth(k, C.items[o.id].name, C.items[o.id].desc); }
     } else if (o.kind === 'evolve') {
       delete player.weapons[o.from];
       player.evolved[o.id] = o.from;
@@ -453,7 +460,7 @@
     if (player && m !== 'title') {
       UI.loadout(
         Object.entries(player.weapons).map(([id, lv]) => ({ name: (WEAPONS[id] && C.weapons[id]) ? C.weapons[id].name : evoInfo(id).name, lv, evolved: !!player.evolved[id] })),
-        Object.entries(player.items).map(([id, lv]) => ({ name: C.items[id].name, lv })));
+        Object.entries(player.items).map(([id, lv]) => ({ name: C.items[id].name, lv, exp: C.items[id].category === 'exp' })));
     }
   }
   function pause() { if (game.mode === 'play') { setMode('paused'); UI.show('paused'); } }
@@ -522,10 +529,10 @@
 
     if (!game.bossSpawned) {
       if (game.t >= STAGE_TIME) spawnBoss();
-      const rate = 8 + game.stageIdx * 2.2 + (game.t / STAGE_TIME) * 16;
+      const rate = 11 + game.stageIdx * 1.6 + (game.t / STAGE_TIME) * 18;
       game.spawnAcc += rate * dt;
       while (game.spawnAcc >= 1) { if (enemies.length < MOB_CAP) spawnMob(); game.spawnAcc -= 1; }
-      if (game.t >= game.nextHorde) { spawnHorde(); game.nextHorde += 11; }
+      if (game.t >= game.nextHorde) { spawnHorde(); game.nextHorde += 10; }
     }
 
     buildGrid();
@@ -595,6 +602,13 @@
       p.t += dt;
       if ((p.x - player.x) ** 2 + (p.y - player.y) ** 2 < 12 * 12) { p.taken = true; usePickup(p, s); }
     }
+    for (const m of mines) {
+      m.t += dt;
+      if (m.t < 0.3) continue;
+      near(m.x, m.y, 8, (e) => { if ((e.x - m.x) ** 2 + (e.y - m.y) ** 2 < (e.r + 5) ** 2) { m.boom = true; return false; } });
+      if (m.boom) { explode(m.x, m.y, m.r, m.dmg, s, 0, '#ff6b6b'); FX.burst(m.x, m.y, '#ffb36b', 14, 90); FX.addShake(0.8); AU.play('pop'); }
+    }
+    mines = mines.filter((m) => !m.boom && m.t < 10);
     for (const b of bolts) b.life -= dt;
 
     enemies = enemies.filter((e) => !e.dead && (e.boss || Math.abs(e.x - player.x) + Math.abs(e.y - player.y) < 900));
@@ -611,20 +625,6 @@
     if (player.xp >= player.xpNext) levelUp();
   }
   // ---------- render ----------
-  function drawGround(camX, camY, stageIdx) {
-    const [g1, g2, deco] = GROUNDS[stageIdx % GROUNDS.length], T = 16;
-    const x0 = Math.floor(camX / T) - 1, y0 = Math.floor(camY / T) - 1;
-    for (let ty = y0; ty < y0 + viewH / T + 3; ty++) {
-      for (let tx = x0; tx < x0 + viewW / T + 3; tx++) {
-        ctx.fillStyle = (tx + ty) & 1 ? g1 : g2;
-        ctx.fillRect(tx * T, ty * T, T, T);
-        const h = ((tx * 73856093) ^ (ty * 19349663)) >>> 0;
-        if (h % 5 === 0) { ctx.fillStyle = deco; ctx.fillRect(tx * T + (h % 11), ty * T + (h % 13), 2, 1); ctx.fillRect(tx * T + (h % 11) + 1, ty * T + (h % 13) - 1, 1, 1); }
-        if (h % 29 === 0) { ctx.fillStyle = deco; ctx.fillRect(tx * T + 4, ty * T + 6, 6, 3); ctx.fillStyle = '#0003'; ctx.fillRect(tx * T + 4, ty * T + 9, 6, 1); }
-      }
-    }
-  }
-
   function drawBullet(b) {
     ctx.strokeStyle = b.color; ctx.fillStyle = b.color;
     if (b.kind === 'bolt') {
@@ -653,7 +653,7 @@
     const sh = FX.shakeOffset();
     const camX = player.x - viewW / 2 + sh.x, camY = player.y - viewH / 2 + sh.y;
     ctx.setTransform(k, 0, 0, k, -camX * k, -camY * k);
-    drawGround(camX, camY, game.stageIdx);
+    SCENE.drawGround(ctx, camX, camY, game.stageIdx, { w: viewW, h: viewH });
 
     for (const g of gems) {
       ctx.fillStyle = g.v >= 3 ? '#ffd23f' : g.v > 1 ? '#6be38b' : '#4fc3ff';
@@ -674,6 +674,10 @@
       }
     }
 
+    for (const m of mines) {
+      ctx.fillStyle = '#2a2d3a'; ctx.fillRect(Math.round(m.x) - 3, Math.round(m.y) - 2, 6, 4);
+      ctx.fillStyle = Math.floor(game.time * 6 + m.x) % 2 ? '#ff4040' : '#5a1414'; ctx.fillRect(Math.round(m.x) - 1, Math.round(m.y) - 1, 2, 2);
+    }
     ctx.fillStyle = '#0006';
     for (const e of enemies) ctx.fillRect(Math.round(e.x - e.w * 0.4), Math.round(e.y + e.h / 2 - 1), Math.round(e.w * 0.8), 2);
     ctx.fillRect(Math.round(player.x - 4), Math.round(player.y + 8), 8, 2);
@@ -745,23 +749,12 @@
     }
   }
 
-  // Title screen background: a slow pan over the ground with wandering errors.
   function renderDemo(k) {
-    if (!demo.length) {
-      for (let i = 0; i < 46; i++) demo.push({ x: Math.random() * 600 - 300, y: Math.random() * 400 - 200, a: Math.random() * 6.28, kind: ['bug', 'fast', 'tank'][i % 3], c: STAGE_COLORS[i % STAGE_COLORS.length] });
-    }
-    const t = performance.now() / 1000, camX = t * 12 - viewW / 2, camY = Math.sin(t * 0.2) * 30 - viewH / 2;
-    ctx.setTransform(k, 0, 0, k, -camX * k, -camY * k);
-    drawGround(camX, camY, Math.floor(t / 6) % GROUNDS.length);
-    for (const m of demo) {
-      m.a += (Math.random() - 0.5) * 0.2; m.x += Math.cos(m.a) * 0.3; m.y += Math.sin(m.a) * 0.3;
-      const wx = ((m.x - camX) % viewW + viewW) % viewW + camX, wy = ((m.y - camY) % viewH + viewH) % viewH + camY;
-      const img = SPR.mob(m.kind, m.c, false);
-      ctx.drawImage(img, Math.round(wx), Math.round(wy), img.width, img.height);
-    }
+    SCENE.drawTitle(ctx, k, { w: viewW, h: viewH });
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = vignette; ctx.fillRect(0, 0, innerWidth, innerHeight);
   }
+
   // ---------- loop ----------
   let last = performance.now();
   function frame(now) {

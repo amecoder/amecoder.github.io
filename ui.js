@@ -54,6 +54,8 @@ window.UI = (function () {
   let toastBusy = false;
   function toast(title, body, kind) {
     queue.push({ title, body, kind });
+    // Fast level-ups can pile up toasts; keep only the newest two so messages stay current.
+    if (queue.length > 2) queue.splice(0, queue.length - 2);
     if (!toastBusy) nextToast();
   }
   function nextToast() {
@@ -63,7 +65,7 @@ window.UI = (function () {
     toastBusy = true;
     el.className = 'toast show ' + (t.kind || '');
     el.innerHTML = `<b>${esc(t.title)}</b>${t.body ? `<span>${esc(t.body)}</span>` : ''}`;
-    setTimeout(() => { el.className = 'toast ' + (t.kind || ''); setTimeout(nextToast, 220); }, t.body ? 3200 : 1600);
+    setTimeout(() => { el.className = 'toast ' + (t.kind || ''); setTimeout(nextToast, 200); }, t.body ? 2600 : 1400);
   }
 
   function hud(h) {
@@ -77,7 +79,7 @@ window.UI = (function () {
 
   function loadout(weapons, items) {
     $('loadout').innerHTML = weapons.map((w) => chip(`${w.name} ${w.lv}`, w.evolved ? 'evo' : 'w'))
-      .concat(items.map((it) => chip(`${it.name} ${it.lv}`))).join('');
+      .concat(items.map((it) => chip(`${it.name} ${it.lv}`, it.exp ? 'exp' : ''))).join('');
   }
 
   function setPlaying(mode) {
