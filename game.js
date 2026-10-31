@@ -492,10 +492,11 @@
 
   const keys = new Set();
   addEventListener('keydown', (e) => {
-    keys.add(e.key.toLowerCase());
-    if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') { if (game.mode === 'play') pause(); else if (game.mode === 'paused') resume(); }
+    const k = UI.keyName(e);
+    keys.add(k);
+    if (k === 'p' || k === 'escape') { if (game.mode === 'play') pause(); else if (game.mode === 'paused') resume(); }
   });
-  addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
+  addEventListener('keyup', (e) => keys.delete(UI.keyName(e)));
   addEventListener('blur', () => keys.clear());
 
   const stick = { active: false, ox: 0, oy: 0, x: 0, y: 0, id: null };

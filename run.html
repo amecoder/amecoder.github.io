@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>커리어 런</title>
+<meta name="description" content="이직한 회사 9곳을 9개 코스로 만든 문형수의 횡스크롤 프로필 게임">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' fill='%230f3443'/%3E%3Crect x='2' y='1' width='4' height='2' fill='%2326262c'/%3E%3Crect x='2' y='3' width='4' height='2' fill='%23f1c49a'/%3E%3Crect x='2' y='5' width='4' height='2' fill='%233d6fd8'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css?v=20261031c">
+<style>
+.topbar { position: fixed; right: 10px; top: 10px; display: flex; gap: 6px; z-index: 6; }
+.topbar button, .topbar a { padding: 6px 10px; font-size: 13px; }
+.topbar a { font-weight: 800; border: 3px solid #000; background: var(--panel-2); color: var(--text); text-decoration: none; box-shadow: 3px 3px 0 #000; }
+.help { position: fixed; left: 12px; bottom: 10px; font-size: 12px; color: var(--muted); pointer-events: none; text-shadow: 0 1px 0 #000; }
+@media (pointer: coarse) { .help { display: none; } }
+#credits { background: #000e; overflow: hidden; align-items: flex-start; }
+#credits .roll { max-width: 560px; width: 100%; text-align: center; animation: roll 60s linear forwards; padding-top: 100vh; }
+#credits .roll h1 { color: var(--accent); font-size: 34px; margin: 0; }
+#credits .roll h2 { color: var(--accent); margin: 40px 0 60vh; }
+#credits .cr-stage { margin: 34px 0; }
+#credits .cr-stage h3 { color: var(--accent); margin: 0 0 6px; }
+#credits .cr-contact { margin-top: 40px; }
+#creditsClose { position: fixed; right: 14px; bottom: 14px; }
+@keyframes roll { from { transform: translateY(0); } to { transform: translateY(-100%); } }
+@media (prefers-reduced-motion: reduce) { #credits .roll { animation: none; padding-top: 20px; } #credits { overflow: auto; } }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div class="topbar">
+  <a href="index.html">특공대 모드</a>
+  <button id="mapBtn" class="ghost">월드맵</button>
+  <button id="resetBtn" class="ghost" aria-label="진행 기록 지우기">↺</button>
+</div>
+<p class="help">이동 ← → / A D · 점프 Space / ↑ / Z (길게 누르면 높이) · 발사 X / J · 월드맵 Esc</p>
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="story">
+  <div class="panel">
+    <span class="tag mono" id="storyTag"></span>
+    <h2 id="storyTitle"></h2>
+    <div id="storyBody"></div>
+    <div class="unlocks" id="storyUnlocks"></div>
+    <div class="btns"><button id="storyBtn">계속</button></div>
+  </div>
+</div>
+<!-- Shared UI module expects these; Career Run does not use level-up cards or the profile view. -->
+<div class="overlay" id="levelup"><div class="panel"><h2 id="levelupTitle"></h2><div id="cards"></div></div></div>
+<div class="overlay" id="profile"><div class="panel"><div id="profileBody"></div><button id="profileClose">닫기</button></div></div>
+
+<div class="overlay" id="credits">
+  <div class="roll"></div>
+  <button id="creditsClose">월드맵으로</button>
+</div>
+
+<script src="content.js?v=20261031c"></script>
+<script src="config.js?v=20261031c"></script>
+<script src="sprites.js?v=20261031c"></script>
+<script src="audio.js?v=20261031c"></script>
+<script src="fx.js?v=20261031c"></script>
+<script src="ui.js?v=20261031c"></script>
+<script src="run-levels.js?v=20261031c"></script>
+<script src="run-ui.js?v=20261031c"></script>
+<script src="run.js?v=20261031c"></script>
+</body>
+</html>

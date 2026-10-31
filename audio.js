@@ -37,7 +37,7 @@ window.AUDIO = (function () {
 
   // Per-sound rate limits keep hordes from turning into white noise.
   const last = {};
-  const LIMIT = { shoot: 0.06, hit: 0.035, pop: 0.03, gem: 0.025, hurt: 0.25 };
+  const LIMIT = { jump: 0.08, shoot: 0.06, hit: 0.035, pop: 0.03, gem: 0.025, hurt: 0.25 };
   let gemPitch = 0, gemReset = 0;
 
   function play(name) {
@@ -71,6 +71,7 @@ window.AUDIO = (function () {
         tone(sfx, { type: 'sine', f: 60, dur: 1.2, vol: 0.3 });
         break;
       case 'dash': noise(sfx, { dur: 0.25, vol: 0.12, freq: 600 }); break;
+      case 'jump': tone(sfx, { type: 'square', f: 300, f2: 620, dur: 0.12, vol: 0.06 }); break;
       case 'evolve':
         [392, 523, 659, 784, 1046, 1318].forEach((f, i) => tone(sfx, { type: 'square', f, at: i * 0.05, dur: 0.16, vol: 0.08 }));
         break;

@@ -72,6 +72,26 @@ window.CONTENT = {
     hotfix:   { name: '핫픽스', facts: '체력 40% 회복', desc: '체력을 40% 회복합니다.' },
   },
 
+  // Career Run signboards: short in-course captions. `facts` are writer notes only.
+  run: {
+    facts: {
+      live: { start: '첫 코스. 밟아서 오류를 처치하고 ?블록에서 기술을 얻는다', graph: '동시접속 그래프처럼 치솟는 계단, 끝에 월드컵 동시접속 보스' },
+      vod: { start: '방송 VOD. 주로 PHP로 개발', java: '코스 후반, 막바지에 Java로 전환한 지점. 여기서 Java 무기를 얻어 X/J로 발사' },
+      hr: { start: '채용 서비스. 2명 풀스택 팀', cache: '?블록 줄이 Redis 캐시처럼 커밋을 한꺼번에 준다(캐시 히트)' },
+      webtoon: { start: '글로벌 웹툰 플랫폼', climb: '만화 칸을 위로 올라가는 구간. 다국어 검색·다국가 결제' },
+      lang: { start: '어학원 온라인 수강 신청 플랫폼 개편', rush: '수강 신청 폭주처럼 빠른 오류가 몰려오는 컨베이어' },
+      talent: { start: '재능 거래 플랫폼, 결제·정산', switch: '결제 → 정산 → 세금 순서로 스위치를 밟아야 문이 열림' },
+      health: { start: '헬스케어 커머스 MVP', collapse: '다리가 무너지지만 아래에서 고객 수요 검증 아이콘을 얻음(사업 종료에서 배운 점)' },
+      brand: { start: '브랜드 커머스, Kotlin 무기 획득', strangler: 'PHP 타일이 밟으면 무너지고 그 자리를 Kotlin 타일이 채움(Strangler Fig 단계 전환)' },
+      ai: { start: '보험 · AI, LLM 무기 획득', wave: '음성 파형 발판이 박자에 맞춰 오르내림', ffwd: '통화 음성이 빨리 감기처럼 재생되던 문제 — 이 구간은 1.6배속' },
+    },
+    signs: {
+      live: { start: '첫 코스에서는 오류를 밟고 ?블록에서 기술을 얻으세요.', graph: '동시접속 그래프 같은 계단을 올라 월드컵 보스에 대비하세요.' }, vod: { start: 'PHP로 방송 VOD를 개발하던 시기의 코스를 따라가세요.', java: 'Java로 전환한 이곳에서 무기를 얻고 X 키로 발사하세요.' }, hr: { start: '풀스택 팀으로 채용 서비스를 만들던 시기의 코스를 따라가세요.', cache: 'Redis 캐시처럼 ?블록 줄에서 커밋을 한꺼번에 얻으세요.' }, webtoon: { start: '글로벌 웹툰 플랫폼을 개발하던 시기의 코스를 따라가세요.', climb: '다국어 검색과 다국가 결제를 다루던 이곳의 만화 칸을 올라가세요.' },
+      lang: { start: '어학원 수강 신청 플랫폼을 개편하던 시기의 코스를 따라가세요.', rush: '수강 신청 폭주처럼 오류가 몰려오는 컨베이어를 조심하세요.' }, talent: { start: '재능 거래 플랫폼의 결제와 정산을 다루던 시기의 코스를 따라가세요.', switch: '결제·정산·세금 순서로 스위치를 밟아 문을 여세요.' }, health: { start: '헬스케어 커머스 MVP를 만들던 시기의 코스를 따라가세요.', collapse: '무너진 다리 아래에서 고객 수요 검증 아이콘을 얻으세요.' },
+      brand: { start: '브랜드 커머스를 만들던 시기에는 Kotlin 무기를 얻으세요.', strangler: 'PHP 타일은 밟으면 무너지고 Kotlin 타일이 그 자리를 채웁니다.' }, ai: { start: '보험과 AI를 다루던 시기에는 LLM 무기를 얻으세요.', wave: '음성 파형 발판이 오르내리는 박자에 맞춰 건너가세요.', ffwd: '통화 음성이 빨리 감기던 문제처럼 빨라진 구간을 조심하세요.' },
+    },
+  },
+
   levels: [
     {
       id: 'career',

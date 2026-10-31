@@ -47,7 +47,18 @@ window.UI = (function () {
     hide('levelup');
     cb(i);
   }
-  addEventListener('keydown', (e) => { if (['1', '2', '3'].includes(e.key)) pick(Number(e.key) - 1); });
+  // Physical key names via e.code so WASD/Z/X/P keep working while a Korean IME is active
+  // (e.key would report 'ㅁ', 'ㅇ', 'ㅈ' instead of 'a', 'd', 'w').
+  function keyName(e) {
+    const c = e.code || '';
+    if (c.startsWith('Key')) return c.slice(3).toLowerCase();
+    if (c.startsWith('Digit')) return c.slice(5);
+    if (c.startsWith('Numpad') && /\d$/.test(c)) return c.slice(-1);
+    if (c === 'Space') return ' ';
+    if (c.startsWith('Arrow') || c === 'Escape' || c === 'Enter' || c === 'NumpadEnter') return c === 'NumpadEnter' ? 'enter' : c.toLowerCase();
+    return (e.key || '').toLowerCase();
+  }
+  addEventListener('keydown', (e) => { const k = keyName(e); if (['1', '2', '3'].includes(k)) pick(Number(k) - 1); });
 
   // Toasts: non-blocking growth messages at the top of the screen.
   const queue = [];
@@ -119,5 +130,5 @@ window.UI = (function () {
     show('ending');
   }
 
-  return { $, show, hide, chip, story, levelup, toast, hud, loadout, setPlaying, profile, ending, esc };
+  return { $, show, hide, chip, story, levelup, toast, hud, loadout, setPlaying, profile, ending, esc, keyName };
 })();
