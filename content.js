@@ -10,7 +10,7 @@ window.CONTENT = {
 
   weapons: {
     php:    { name: 'PHP',     mechanic: '가장 가까운 적에게 기본탄', facts: '개인방송·방송 VOD·채용·웹툰 서비스를 LAMP/LEMP로 개발', desc: '가장 가까운 적에게 기본탄을 쏩니다.', story: '저는 개인방송과 방송 VOD, 채용, 웹툰 서비스를 PHP로 개발했습니다.' },
-    java:   { name: 'Java',    mechanic: '적을 관통하는 무거운 탄', facts: '방송 VOD(Java Spring·MyBatis), 교육 플랫폼(Java Spring), 수리 서비스(Spring Boot·JPA·JdbcTemplate)', desc: '적을 관통하는 무거운 탄을 쏩니다.', story: '저는 방송 VOD와 교육 플랫폼, 수리 서비스를 Java와 Spring으로 개발했습니다.' },
+    java:   { name: 'Java',    mechanic: '적을 관통하는 무거운 탄', facts: '방송 VOD에서 PHP로 개발하다 막바지에 Java Spring·MyBatis로 전환(사용자 확인). 이후 어학원 플랫폼(Java Spring), 브랜드 커머스 수리 서비스(Spring Boot·JPA·JdbcTemplate)', desc: '적을 관통하는 무거운 탄을 쏩니다.', story: '저는 방송 VOD 플랫폼을 PHP로 개발하다 막바지에 Java와 Spring, MyBatis로 전환했습니다.' },
     kotlin: { name: 'Kotlin',  mechanic: '부채꼴로 퍼지는 여러 발', facts: '브랜드 커머스 PIM·신규 커머스 플랫폼·레거시 현대화를 Kotlin·Spring Boot로. 사내에 Kotlin 교육', desc: '부채꼴로 퍼지는 탄을 여러 발 쏩니다.', story: '저는 커머스 상품 정보 관리와 신규 플랫폼 개발, 기존 시스템 현대화에 Kotlin과 Spring Boot를 사용했습니다.' },
     cpp:    { name: 'C++',     mechanic: '발밑에 지뢰를 깔고 적이 닿으면 폭발', facts: '방송 VOD 플랫폼 통합 개발 기술 스택에 C++·DRM 포함', desc: '발밑에 깐 지뢰는 적이 닿으면 폭발합니다.', story: '저는 방송 VOD 플랫폼의 통합 개발에 C++를 사용했습니다.' },
     nodejs: { name: 'Node.js', mechanic: '작은 탄을 빠르게 연사', facts: 'AI 세일즈 콜 플랫폼(팀 구축) 연동에 사용', desc: '작은 탄을 빠르게 연속으로 쏩니다.', story: '저는 팀과 함께 구축한 AI 세일즈 콜 플랫폼의 시스템 연동에 Node.js를 사용했습니다.' },
@@ -86,11 +86,11 @@ window.CONTENT = {
           clear: '저는 월드컵 기간의 동시접속에 대응했습니다. 개인방송 웹 서비스의 개발과 운영을 함께 경험했습니다.',
         },
         {
-          id: 'vod', name: '방송 VOD', unlock: { weapons: ['java', 'cpp'], items: ['elasticsearch', 'aws', 'mybatis', 'drm'] },
+          id: 'vod', name: '방송 VOD', autoGrant: false, lateWeapon: 'java', unlock: { weapons: ['cpp'], items: ['elasticsearch', 'aws', 'mybatis', 'drm'] },
           mobs: [{ name: '503', kind: 'fast' }, { name: '인코딩 실패', kind: 'bug' }, { name: '동기화 누락', kind: 'tank' }, { name: 'DRM 오류', kind: 'bug' }],
           boss: { name: 'VOD 플랫폼 개편', facts: 'VOD 플랫폼 개편, 회사 첫 AWS 도입. 콘텐츠 허브 담당자들과 DB 동기화 누락·오류를 함께 확인·수정' },
-          facts: '방송 VOD 플랫폼 통합 개발. LAMP·Elasticsearch·C++·DRM·WordPress·Java Spring·MyBatis·AWS',
-          intro: '저는 방송 VOD 플랫폼의 통합 개발을 맡았습니다. Java와 Spring, Elasticsearch를 사용했습니다.',
+          facts: '방송 VOD 플랫폼 통합 개발. 주로 PHP(LAMP)로 개발하다 막바지에 Java(Spring·MyBatis)로 전환(사용자 확인). Elasticsearch·C++·DRM·WordPress·AWS',
+          intro: '저는 방송 VOD 플랫폼의 통합 개발을 맡았습니다. 주로 PHP로 개발했고 Elasticsearch와 C++, DRM을 사용했습니다.',
           clear: '저는 플랫폼 개편 과정에서 AWS를 도입했습니다. 콘텐츠 허브 담당자들과 데이터베이스 동기화 누락과 오류를 함께 확인하고 수정했습니다.',
         },
         {

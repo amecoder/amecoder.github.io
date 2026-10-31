@@ -5,7 +5,7 @@
   const C = window.CONTENT, SPR = window.SPRITES, AU = window.AUDIO, FX = window.FX, UI = window.UI, SCENE = window.SCENE;
   const LEVEL = C.levels[0];
   const STAGES = LEVEL.stages;
-  const STAGE_TIME = 30;
+  const STAGE_TIME = 20;
   const WEAPON_MAX = 5, ITEM_MAX = 3, MOB_CAP = 520;
   const { STAGE_COLORS, KINDS, PICKUP_CHANCE, EVOLUTIONS } = window.GAME_CONFIG;
   const DEBUG = /[?&]debug\b/.test(location.search);
@@ -192,6 +192,14 @@
     enemies.push({ x: p.x, y: p.y, r: 12, hp, maxHp: hp, spd: 30, dmg: 16 + game.stageIdx * 3, name: st.boss.name, boss: true, kind: 'boss',
       color: stageColor(), kx: 0, ky: 0, hitCd: 0, flash: 0, w: 32, h: 30, pattern: 0, patternT: 2.5, dashing: 0, tele: 0, tx: 0, ty: 0 });
     game.bossSpawned = true;
+    // A stage can hand over a weapon late, e.g. switching from PHP to Java near the end of a job.
+    if (st.lateWeapon && !player.weapons[st.lateWeapon]) {
+      const w = C.weapons[st.lateWeapon];
+      player.weapons[st.lateWeapon] = 1;
+      setMode('play');
+      UI.toast(w.name + '(으)로 전환', w.story, '');
+      logGrowth('weapon', w.name + ' 획득', w.story);
+    }
     AU.play('boss'); AU.setIntense(true);
     FX.slowMo(0.9); FX.addShake(6); FX.flash('#ff2a2a', 0.35);
     UI.toast('BOSS · ' + st.boss.name, '', 'warn');
@@ -328,7 +336,7 @@
     AU.setStage(idx); AU.setIntense(false);
     const st = STAGES[idx];
     if (!retry) {
-      const got = st.unlock.weapons.find((w) => !player.weapons[w] && !Object.values(player.evolved).includes(w));
+      const got = st.autoGrant === false ? null : st.unlock.weapons.find((w) => !player.weapons[w] && !Object.values(player.evolved).includes(w));
       if (got) { player.weapons[got] = 1; logGrowth('weapon', C.weapons[got].name + ' 획득', C.weapons[got].story); }
       game.snapshot = JSON.stringify({ weapons: player.weapons, items: player.items, evolved: player.evolved, level: player.level,
         xp: player.xp, xpNext: player.xpNext, bonusDamage: player.bonusDamage, logLen: game.log.length });
@@ -389,6 +397,7 @@
   function options() {
     const w = new Set(), it = new Set(), cur = STAGES[game.stageIdx].unlock;
     for (let i = 0; i <= game.stageIdx; i++) { STAGES[i].unlock.weapons.forEach((x) => w.add(x)); STAGES[i].unlock.items.forEach((x) => it.add(x)); }
+    Object.keys(player.weapons).forEach((x) => { if (C.weapons[x]) w.add(x); });
     const evo = [], fresh = [], rest = [];
     for (const ev of EVOLUTIONS) {
       if (player.weapons[ev.from] >= WEAPON_MAX && ((ev.needWeapon && player.weapons[ev.needWeapon]) || (ev.needItem && player.items[ev.needItem]))) {
