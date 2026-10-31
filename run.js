@@ -5,7 +5,7 @@
   const C = window.CONTENT, LV = window.RUN_LEVELS, SPR = window.SPRITES, AU = window.AUDIO, FX = window.FX, UI = window.UI, RUI = window.RUN_UI;
   const STAGES = C.levels[0].stages;
   const T = 16;
-  const P = { acc: 900, air: 620, fric: 1100, max: 128, jump: 350, grav: 1000, maxFall: 430, cut: 130 };
+  const P = { acc: 900, air: 620, fric: 1100, max: 128, jump: 420, grav: 1000, maxFall: 430, cut: 130 };
   const SOLID = new Set(['#', 'B', '?', 'b', 'k', 'X', 'x', 'R', '>']);
   const DEBUG = /[?&]debug\b/.test(location.search);
   const RUN_TEXT = (C.run && C.run.signs) || {};
