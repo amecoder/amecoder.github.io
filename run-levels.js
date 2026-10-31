@@ -87,10 +87,10 @@ window.RUN_LEVELS = (function () {
   }
   function pulsePads(b, count) {
     for (let i = 0; i < count; i++) {
-      gap(b, 4);
+      gap(b, 2);
       const x = b.x();
-      gap(b, 4);
-      b.ent({ type: 'pulse', x, y: b.g - 2, w: 4, amp: 2.2, phase: i * 0.9 });
+      gap(b, 5);
+      b.ent({ type: 'pulse', x, y: b.g - 1, w: 5, amp: 1.3, phase: i * 0.9 });
     }
     gap(b, 2);
   }
@@ -99,9 +99,11 @@ window.RUN_LEVELS = (function () {
     const x0 = b.x();
     flat(b, 26);
     for (let i = 0; i < levels; i++) {
-      const y = b.g - 3 - i * 3, x = x0 + 2 + (i % 2 ? 14 : 4);
-      for (let k = 0; k < 7; k++) { b.put(x + k, y, '='); if (k % 2) b.put(x + k, y - 1, 'c'); }
+      const y = b.g - 3 - i * 3, x = x0 + (i % 2 ? 13 : 7);
+      for (let k = 0; k < 9; k++) { b.put(x + k, y, '='); if (k % 2) b.put(x + k, y - 1, 'c'); }
     }
+    // A last ledge reaches the walkway wall so the top panel connects to the high road.
+    for (let k = 21; k < 26; k++) b.put(x0 + k, b.g - 3 - (levels - 1) * 3, '=');
     return { x0, topY: b.g - 3 - (levels - 1) * 3 };
   }
   function switchGate(b, labels) {
@@ -147,7 +149,7 @@ window.RUN_LEVELS = (function () {
       // Late switch from PHP to Java: the Java power sits at the turning point.
       sign(b, b.x() + 1, 'java', '');
       flat(b, 10);
-      b.ent({ type: 'weapon', x: b.x() - 5, y: b.g - 3, weapon: 'java' });
+      b.ent({ type: 'weapon', x: b.x() - 5, y: b.g - 1, weapon: 'java' });
       icon(b, b.x() - 2, b.g - 6, 1);
       conveyor(b, 16, ['tank', 'bug', 'fast']);
       gap(b, 3); flat(b, 12, { enemies: ['bug', 'bug'], coins: true });
@@ -159,9 +161,9 @@ window.RUN_LEVELS = (function () {
       flat(b, 12, { coins: true });
       sign(b, 3, 'start', '');
       // Cache hits: a row of question blocks that keep paying out commits.
-      sign(b, 10, 'cache', '');
-      qrow(b, 12, b.g - 4, ['coins', 'redis', 'coins'], 1);
       flat(b, 16, { enemies: ['bug', 'fast'] });
+      sign(b, b.x() - 15, 'cache', '');
+      qrow(b, b.x() - 12, b.g - 4, ['coins', 'redis', 'coins'], 1);
       icon(b, b.x() - 3, b.g - 7, 0);
       islandHop(b, 3, true);
       flat(b, 12, { enemies: ['tank'] });
@@ -261,7 +263,7 @@ window.RUN_LEVELS = (function () {
       sign(b, 3, 'start', '');
       qrow(b, 8, b.g - 4, ['kafka', 'dynamodb']);
       flat(b, 14, { enemies: ['bug', 'tank'] });
-      b.ent({ type: 'weapon', x: b.x() - 4, y: b.g - 3, weapon: 'kotlin' });
+      b.ent({ type: 'weapon', x: b.x() - 4, y: b.g - 1, weapon: 'kotlin' });
       icon(b, b.x() - 8, b.g - 7, 0);
       // Strangler Fig: PHP tiles crumble one by one and Kotlin tiles take their place.
       sign(b, b.x() + 1, 'strangler', '');
@@ -283,7 +285,7 @@ window.RUN_LEVELS = (function () {
       sign(b, 3, 'start', '');
       qrow(b, 8, b.g - 4, ['websocket', 'gpu']);
       flat(b, 12, { enemies: ['bug', 'fast'] });
-      b.ent({ type: 'weapon', x: b.x() - 3, y: b.g - 3, weapon: 'llm' });
+      b.ent({ type: 'weapon', x: b.x() - 3, y: b.g - 1, weapon: 'llm' });
       icon(b, b.x() - 7, b.g - 7, 0);
       // Voice-wave pads bob to the beat.
       sign(b, b.x() + 1, 'wave', '');

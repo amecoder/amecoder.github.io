@@ -9,6 +9,8 @@
   const SOLID = new Set(['#', 'B', '?', 'b', 'k', 'X', 'x', 'R', '>']);
   const DEBUG = /[?&]debug\b/.test(location.search);
   const RUN_TEXT = (C.run && C.run.signs) || {};
+  // Course index where each weapon is picked up; a replayed course only keeps weapons from earlier courses.
+  const WEAPON_COURSE = { java: 1, kotlin: 7, llm: 8 };
 
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
@@ -31,6 +33,7 @@
   function tile(x, y) { const col = S.lv.grid[x]; return col ? col[y] || '.' : '.'; }
   function setTile(x, y, ch) { if (S.lv.grid[x]) S.lv.grid[x][y] = ch; }
   function solidAt(x, y) {
+    if (x < 0 || x >= S.lv.w) return true; // level edges act as walls
     const ch = tile(x, y);
     if (SOLID.has(ch)) return true;
     if (ch === 'D') return !S.doorOpen;
@@ -39,12 +42,14 @@
   }
 
   function startCourse(i) {
+    document.getElementById('credits').classList.remove('show');
     S.idx = i; S.lv = LV.build(stageOf(i).id); S.time = 0; S.commits = 0; S.doorOpen = false; S.nextSwitch = 0;
     S.arenaLocked = false; S.bossDead = false; S.icons = [false, false, false].map((_, k) => !!(save.icons[S.lv.id] || [])[k]);
     const g = S.lv.g;
     S.cp = { x: 3 * T, y: (g - 1) * T };
+    const owned = (save.weapons || []).filter((w) => WEAPON_COURSE[w] < i).sort((a, b) => WEAPON_COURSE[b] - WEAPON_COURSE[a]);
     pl = { x: S.cp.x, y: S.cp.y, w: 10, h: 14, vx: 0, vy: 0, face: 1, ground: false, coyote: 0, jumpBuf: 0, hearts: 3, inv: 0,
-      shield: false, speedT: 0, magnetT: 0, chainT: 0, boostT: 0, shootCd: 0, walk: 0, weapon: save.weapon, onPad: null };
+      shield: false, speedT: 0, magnetT: 0, chainT: 0, boostT: 0, shootCd: 0, walk: 0, weapon: owned[0] || null, onPad: null };
     enemies = []; powers = []; shots = []; waves = []; crumbling = new Map();
     for (const e of S.lv.ents) {
       if (e.type === 'enemy') enemies.push(makeEnemy(e.kind, e.x * T, e.y * T));
@@ -252,7 +257,8 @@
         UI.toast(`기술 아이콘 · ${S.lv.icons[e.idx]}`, `${S.icons.filter(Boolean).length}/3 수집`, 'exp');
       }
       if (e.type === 'weapon' && near) {
-        e.done = true; pl.weapon = e.weapon; save.weapon = e.weapon; RUI.save(save);
+        e.done = true; pl.weapon = e.weapon;
+        save.weapons = [...new Set([...(save.weapons || []), e.weapon])]; RUI.save(save);
         const w = C.weapons[e.weapon];
         AU.play('evolve'); FX.flash('#c88bff', 0.35);
         UI.toast(`${w.name} 획득 · B / X 키로 발사`, w.story, 'evo');
@@ -261,7 +267,8 @@
         e.on = true; S.cp = { x: ex, y: ey - 2 }; AU.play('pickup'); UI.toast('체크포인트', '', 'item');
       }
       if (e.type === 'switch' && !e.on && near && pl.vy >= 0) pressSwitch(e);
-      if (e.type === 'flag' && S.bossDead && Math.abs(pl.x - ex) < 12) { e.done = true; clearCourse(); return; }
+      // Reaching or passing the flag after the boss falls counts, so the player never has to walk back.
+      if (e.type === 'flag' && S.bossDead && pl.x + pl.w > ex) { e.done = true; clearCourse(); return; }
     }
     for (const p of powers) {
       p.t += dt; p.vy = Math.min(200, p.vy + 500 * dt); p.y += p.vy * dt;
@@ -655,7 +662,7 @@
   document.getElementById('mapBtn').addEventListener('click', () => { AU.stopMusic(); UI.hide('story'); S.mode = 'map'; });
   document.getElementById('resetBtn').addEventListener('click', () => {
     if (!confirm('커리어 런 진행 기록을 지울까요?')) return;
-    save = { cleared: [], icons: {}, weapon: null, best: {} }; RUI.save(save); S.sel = 0; S.mode = 'map';
+    save = { cleared: [], icons: {}, weapons: [], best: {} }; RUI.save(save); S.sel = 0; S.mode = 'map';
   });
 
   // ---------- loop ----------

@@ -7,7 +7,7 @@ window.RUN_UI = (function () {
       const s = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (s && Array.isArray(s.cleared)) return s;
     } catch (e) { /* storage unavailable or corrupt; start fresh */ }
-    return { cleared: [], icons: {}, weapon: null, best: {} };
+    return { cleared: [], icons: {}, weapons: [], best: {} };
   }
   function save(s) {
     try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* storage unavailable */ }
@@ -69,7 +69,7 @@ window.RUN_UI = (function () {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(hero, Math.round(p.x - 12), Math.round(p.y - 30 + Math.sin(t * 5) * 2), 24, 32);
     ctx.textAlign = 'left';
-    ctx.font = '900 22px -apple-system, "Apple SD Gothic Neo", sans-serif';
+    ctx.font = `900 ${w < 480 ? 17 : 22}px -apple-system, "Apple SD Gothic Neo", sans-serif`;
     ctx.fillStyle = '#000'; ctx.fillText('커리어 런 · 월드맵', 18, 42);
     ctx.fillStyle = '#ffd23f'; ctx.fillText('커리어 런 · 월드맵', 16, 40);
     ctx.font = '600 13px -apple-system, "Apple SD Gothic Neo", sans-serif'; ctx.fillStyle = '#cfd3e0';
