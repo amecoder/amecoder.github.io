@@ -1,0 +1,6 @@
+# Every page on this host may be crawled (same as having no robots.txt).
+# Sitemap lines let search engines find the sitemaps of sites published under this host.
+User-agent: *
+Allow: /
+
+Sitemap: https://amecoder.github.io/hello-llm/sitemap.xml
